@@ -1,3 +1,6 @@
 __pycache__
 .DS_Store
 watermarks/*.wav
+test/audio/original/*.wav
+test/audio/watermarked-audio/*.wav
+test/audio/watermark/*.wav

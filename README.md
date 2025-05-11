@@ -8,6 +8,8 @@ Generative watermarks based on encryption techniques for embedding a signature i
 - Null testing capability for watermark detection
 - Preserves audio quality and aesthetics
 - Compatible with any DAW
+- Automated watermark detection and analysis
+- Correlation-based watermark verification
 
 ## Technical Specifications
 - Sample Rate: 44.1kHz
@@ -58,8 +60,9 @@ python generate.py --duration 03:30
 
 **NOTE**: You must bypass any processing when rendering the project with the watermark. You can do this by routing all audio to a dedicated mix buss then route the watermark and mix buss to the master buss (or the dedicated main/master channel depending on your choice of DAW). This allows you to apply processing to your mix as one does when mastering while bypassing the watermark omitting it from processing. Alternatively, you can render the DAW project with post processing applied and no watermark then insert the unwatermarked version in a new project with no post processing and layer the watermark in this session. This is crucial, any processing applied to the watermark may affect your ability to isolate it when null testing.
 
-## Watermark Detection Procedure
+## Watermark Detection
 
+### Manual Detection
 1. Render a version of the DAW project that does not include the watermark
 
 2. Create a new session and insert the suspicious audio in the DAW
@@ -78,12 +81,56 @@ python generate.py --duration 03:30
 
 7. **Optional**: If you level match the resulting null with the watermark present with the raw watermark you can null test this to ensure the same key was used.
 
+### Automated Detection
+The project includes an automated testing script that can analyze audio files for watermark presence. The script performs a null test and analyzes the results using various metrics including:
+- RMS level analysis
+- Frequency band energy distribution
+- DC offset detection
+- Correlation with original watermark
+- Confidence scoring
+
+To use the automated detection:
+
+1. Place your files in the following structure:
+```
+test/
+├── audio/
+│   ├── original/         # Original unwatermarked audio
+│   ├── watermark/        # Original watermark file
+│   └── watermarked-audio/ # Suspected watermarked audio
+└── test.py
+```
+
+2. Run the test script:
+```bash
+python test/test.py \
+  --original test/audio/original/your_original.wav \
+  --watermarked test/audio/watermarked-audio/your_watermarked.wav \
+  --watermark test/audio/watermark/your_watermark.wav \
+  --plot
+```
+
+The script will:
+- Perform the null test
+- Analyze the results
+- Generate visualizations (if --plot is specified)
+- Provide a confidence score
+- Save analysis plots to `test/results/`
+
+The confidence score is based on:
+- RMS level of the null result
+- Evenness of energy distribution across frequency bands
+- Absence of DC offset
+- Correlation with original watermark
+
 ## Troubleshooting
 
 ### Common Issues
 - **Watermark is audible**: Ensure the watermark is mixed at -64dB or lower
 - **Null test fails**: Check that the audio files are perfectly aligned and that no processing has been applied to the watermark
 - **Generation fails**: Verify Python version and dependencies are correctly installed
+- **Test script errors**: Ensure audio files are 16-bit WAV format and have matching sample rates
+- **Low confidence score**: Verify file alignment and check for any processing applied to the watermark
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
